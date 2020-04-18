@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <meta charset="UTF-8">
+      <link rel="stylesheet" type="text/css" href="button.css" >
+      <link rel="stylesheet" type="text/css" href="checkbox.css" >
+   </head>
+<body>
+
+<h2>Ein mal eins</h2>
+<!--
+<progress id="file" value="32" max="100"> 32% </progress>
+-->
+
+<div id="ck-button"><label><input type="checkbox" onchange="cbChanged()" id="2"><span>2</span></label></div>
+<div id="ck-button"><label><input type="checkbox" onchange="cbChanged()" id="3"><span>3</span></label></div>
+<div id="ck-button"><label><input type="checkbox" onchange="cbChanged()" id="4"><span>4</span></label></div>
+<div id="ck-button"><label><input type="checkbox" onchange="cbChanged()" id="5"><span>5</span></label></div>
+<div id="ck-button"><label><input type="checkbox" onchange="cbChanged()" id="6"><span>6</span></label></div>
+<div id="ck-button"><label><input type="checkbox" onchange="cbChanged()" id="7"><span>7</span></label></div>
+<div id="ck-button"><label><input type="checkbox" onchange="cbChanged()" id="8"><span>8</span></label></div>
+<div id="ck-button"><label><input type="checkbox" onchange="cbChanged()" id="9"><span>9</span></label></div>
+<div id="ck-button"><label><input type="checkbox" onchange="cbChanged()" id="12"><span>12</span></label></div>
+
+<br>
+<br>
+<br>
+<br>
+<p style="font-size:50px" for="fname" id="Question">3*7</p>
+
+
+<button class="button" id="choose0" onclick="choose(0)">?</button>
+<button class="button" id="choose1" onclick="choose(1)">?</button>
+<button class="button" id="choose2" onclick="choose(2)">?</button>
+<button class="button" id="choose3" onclick="choose(3)">?</button>
+
+
+<p style="font-size:30px" id="Result"></p>
+<p style="font-size:100px" id="smiley"/>
+<p style="font-size:30px" id="Successive"/>
+<p style="font-size:30px" id="Speed"/>
+
+
+<script>
+   var emojis=
+   [
+// first column: >0 : happy, <=0 : sad
+1,/*😀*/	128512	,//1F600	 	GRINNING FACE
+1,/*😁*/	128513	,//1F601	 	GRINNING FACE WITH SMILING EYES
+1,/*😂*/	128514	,//1F602	 	FACE WITH TEARS OF JOY
+1,/*😃*/	128515	,//1F603	 	SMILING FACE WITH OPEN MOUTH
+1,/*😄*/	128516	,//1F604	 	SMILING FACE WITH OPEN MOUTH AND SMILING EYES
+1,/*😅*/	128517	,//1F605	 	SMILING FACE WITH OPEN MOUTH AND COLD SWEAT
+1,/*😆*/	128518	,//1F606	 	SMILING FACE WITH OPEN MOUTH AND TIGHTLY-CLOSED EYES
+1,/*😇*/	128519	,//1F607	 	SMILING FACE WITH HALO
+1,/*😈*/	128520	,//1F608	 	SMILING FACE WITH HORNS
+1,/*😉*/	128521	,//1F609	 	WINKING FACE
+1,/*😊*/	128522	,//1F60A	 	SMILING FACE WITH SMILING EYES
+1,/*😋*/	128523	,//1F60B	 	FACE SAVOURING DELICIOUS FOOD
+// 1,/*😌*/	128524	,//1F60C	 	RELIEVED FACE
+1,/*😍*/	128525	,//1F60D	 	SMILING FACE WITH HEART-SHAPED EYES
+1,/*😎*/	128526	,//1F60E	 	SMILING FACE WITH SUNGLASSES
+1,/*😏*/	128527	,//1F60F	 	SMIRKING FACE
+//0,/*😐*/	128528	,//1F610	 	NEUTRAL FACE
+//0,/*😑*/	128529	,//1F611	 	EXPRESSIONLESS FACE
+0,/*😒*/	128530	,//1F612	 	UNAMUSED FACE
+0,/*😓*/	128531	,//1F613	 	FACE WITH COLD SWEAT
+0,/*😔*/	128532	,//1F614	 	PENSIVE FACE
+0,/*😕*/	128533	,//1F615	 	CONFUSED FACE
+0,/*😖*/	128534	,//1F616	 	CONFOUNDED FACE
+//1,/*😗*/	128535	,//1F617	 	KISSING FACE
+1,/*😘*/	128536	,//1F618	 	FACE THROWING A KISS
+1,/*😙*/	128537	,//1F619	 	KISSING FACE WITH SMILING EYES
+1,/*😚*/	128538	,//1F61A	 	KISSING FACE WITH CLOSED EYES
+1,/*😛*/	128539	,//1F61B	 	FACE WITH STUCK-OUT TONGUE
+1,/*😜*/	128540	,//1F61C	 	FACE WITH STUCK-OUT TONGUE AND WINKING EYE
+1,/*😝*/	128541	,//1F61D	 	FACE WITH STUCK-OUT TONGUE AND TIGHTLY-CLOSED EYES
+0,/*😞*/	128542	,//1F61E	 	DISAPPOINTED FACE
+0,/*😟*/	128543	,//1F61F	 	WORRIED FACE
+0,/*😠*/	128544	,//1F620	 	ANGRY FACE
+0,/*😡*/	128545	,//1F621	 	POUTING FACE
+0,/*😢*/	128546	,//1F622	 	CRYING FACE
+0,/*😣*/	128547	,//1F623	 	PERSEVERING FACE
+0,/*😤*/	128548	,//1F624	 	FACE WITH LOOK OF TRIUMPH
+0,/*😥*/	128549	,//1F625	 	DISAPPOINTED BUT RELIEVED FACE
+0,/*😦*/	128550	,//1F626	 	FROWNING FACE WITH OPEN MOUTH
+0,/*😧*/	128551	,//1F627	 	ANGUISHED FACE
+0,/*😨*/	128552	,//1F628	 	FEARFUL FACE
+0,/*😩*/	128553	,//1F629	 	WEARY FACE
+0,/*😪*/	128554	,//1F62A	 	SLEEPY FACE
+0,/*😫*/	128555	,//1F62B	 	TIRED FACE
+0,/*😬*/	128556	,//1F62C	 	GRIMACING FACE
+0,/*😭*/	128557	,//1F62D	 	LOUDLY CRYING FACE
+//0,/*😮*/	128558	,//1F62E	 	FACE WITH OPEN MOUTH
+//0,/*😯*/	128559	,//1F62F	 	HUSHED FACE
+0,/*😰*/	128560	,//1F630	 	FACE WITH OPEN MOUTH AND COLD SWEAT
+0,/*😱*/	128561	,//1F631	 	FACE SCREAMING IN FEAR
+//1,/*😲*/	128562	,//1F632	 	ASTONISHED FACE
+//0,/*😳*/	128563	,//1F633	 	FLUSHED FACE
+//0,/*😴*/	128564	,//1F634	 	SLEEPING FACE
+//0,/*😵*/	128565	,//1F635	 	DIZZY FACE
+1,/*😶*/	128566	,//1F636	 	FACE WITHOUT MOUTH
+//0,/*😷*/	128567	,//1F637	 	FACE WITH MEDICAL MASK
+0,/*🙁*/	128577	,//1F641	 	
+1,/*🙂*/	128578	,//1F642	 	
+1,/*🙃*/	128579	,//1F643	 	
+1,/*🙄*/	128580	,//1F644	 	
+1,/*🤐*/  129296	,//	1F910	 
+
+];
+
+var a=1;
+var b=2;
+var nrOfSuccessiveCorrectAnswers=0;
+var startTimeMillis;
+var startOfQuestionMillis;
+var slowestQuestion;
+var slowestQuestionMillis=0;
+var previousQuestions = new Array;
+var nrOfHappyEmojis = 0;
+var nrOfSadEmojis = 0;
+for( i=0; i<emojis.length/2; ++i)
+{
+   if ( emojis[i*2]>0 ) 
+      ++nrOfHappyEmojis;
+}
+nrOfSadEmojis = emojis.length/2 - nrOfHappyEmojis;
+
+   function randomEmoji(bHappy)
+   {
+      var count = bHappy ? nrOfHappyEmojis : nrOfSadEmojis;
+      var idx = Math.floor(Math.random() * count);
+      var i2 = 0;
+      for(i=0; i<emojis.length/2; ++i)
+      {
+         if ( emojis[i*2]==(bHappy ? 1 : 0) )
+         {
+            ++i2;
+            if ( i2 == idx )
+               return emojis[i*2+1];
+         }
+      }
+      return emojis[1];
+   }
+
+   var correctChoice = 0;
+
+   function choose(btn) 
+   {
+      var r = a * b;
+
+      if ( correctChoice == btn )
+      {
+         ++nrOfSuccessiveCorrectAnswers;
+         var nowMillis = Date.now();
+         var timeForQuestionMillis = nowMillis - startOfQuestionMillis;
+         if ( timeForQuestionMillis > slowestQuestionMillis )
+         {
+            slowestQuestionMillis = timeForQuestionMillis;
+            slowestQuestion = a.toString() + " * " + b.toString() + " = " + r.toString();
+         }
+         
+         var minutesSinceStart = (nowMillis - startTimeMillis)/1000/60;
+         var answersPerMinute = Math.round( nrOfSuccessiveCorrectAnswers / minutesSinceStart );
+         document.getElementById('Result').innerHTML = 'Richtig: ' + r.toString();
+         document.getElementById('Successive').innerHTML = "Hintereinander richtig: "+nrOfSuccessiveCorrectAnswers.toString();
+         document.getElementById('Speed').innerHTML = "Je Minute: " + answersPerMinute.toString();
+
+         document.getElementById('smiley').innerHTML = String.fromCodePoint(randomEmoji(true));
+
+         setTimeout( prepareNextTask, 1000);
+      }
+      else
+      {
+         document.getElementById('Result').innerHTML = 'Leider falsch. Richtig wäre ' + r.toString();
+         document.getElementById('smiley').innerHTML = String.fromCodePoint(randomEmoji(false));
+         document.getElementById('Speed').innerHTML = "Langsam bei: " + slowestQuestion + " ("+(slowestQuestionMillis/1000).toFixed(1)+" Sekunden)";
+         setTimeout( startGame, 5000);
+      }
+   }
+
+   function randomInt(min,max)
+   {
+      return min + Math.floor( Math.random()*(max-min+1) );
+   }
+
+   function prepareQuestion()
+   {
+      var checkedValues = new Array;
+      for( var i=0; i<12; ++i )
+      {
+         var element = document.getElementById(i.toString());
+         if ( element != null && element.checked )
+            checkedValues.push(i);
+      }
+
+      if ( checkedValues.length>0 )
+      {
+         var idx = randomInt(0,checkedValues.length-1);
+         b = checkedValues[idx];
+      }
+      else
+      {
+         b = randomInt(2,10);
+      }
+
+      var question;
+      do
+      {
+         a = randomInt(1,10);
+         question = a.toString() + " * " + b.toString();
+      } while ( previousQuestions.indexOf(question)!=-1 ); // don't repeat if in list
+
+      previousQuestions.push(question);
+      if (previousQuestions.length>5) // allow only 5 previous entries
+         previousQuestions.shift();
+
+      document.getElementById('Question').innerHTML = question;
+      document.getElementById('Result').innerHTML = '';
+   }
+
+   function startGame()
+   {
+      nrOfSuccessiveCorrectAnswers = 0;
+      startTimeMillis = Date.now();
+      startOfQuestionMillis = startTimeMillis;
+      slowestQuestionMillis = 0;
+      slowestQuestion="";
+      previousQuestions = new Array();
+      prepareNextTask();      
+   }
+
+   function cbChanged()
+   {
+      startGame();
+   }
+
+   function prepareNextTask()
+   {
+      startOfQuestionMillis = Date.now();
+      prepareQuestion();
+      document.getElementById('smiley').innerHTML = '?';
+
+      var correctAnswer = a * b;
+      var answers = new Array;
+      var nrOfChoices = 4;
+      for(i=0;i<nrOfChoices;++i)
+      {
+         var newRandomAnswer;
+         do
+         {
+            newRandomAnswer = randomInt(1,correctAnswer+10);
+         } while ( answers.indexOf( newRandomAnswer )!=-1 );
+         answers.push( newRandomAnswer );
+      }
+
+      correctChoice = answers.indexOf( correctAnswer );
+      if ( correctChoice==-1 )
+      {
+         correctChoice = randomInt( 0, nrOfChoices-1 );
+         answers[correctChoice] = correctAnswer;
+      }
+
+      document.getElementById('choose0').innerHTML = answers[0].toString();
+      document.getElementById('choose1').innerHTML = answers[1].toString();
+      document.getElementById('choose2').innerHTML = answers[2].toString();
+      document.getElementById('choose3').innerHTML = answers[3].toString();
+   }
+
+   cbChanged();
+</script>
+</body>
+</html>
