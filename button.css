@@ -6,7 +6,8 @@
    text-align: center;
    text-decoration: none;
    display: inline-block;
-   font-size: 30px;
+   font-size: 40px;
    margin: 4px 2px;
    cursor: pointer;
+   min-width: 115px;
  }
