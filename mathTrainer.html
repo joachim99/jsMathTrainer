@@ -4,6 +4,7 @@
       <meta charset="UTF-8">
       <link rel="stylesheet" type="text/css" href="button.css" >
       <link rel="stylesheet" type="text/css" href="checkbox.css" >
+      <link rel="stylesheet" type="text/css" href="select.css" >
    </head>
    <style>
       body {
@@ -20,20 +21,30 @@
    </style>
 <body>
 
-<h2>Ein mal eins</h2>
+<h2 style="text-align: center;">Ein mal eins</h2>
 <!--
 <progress id="file" value="32" max="100"> 32% </progress>
 -->
 
-<div id="ck-button"><label><input type="checkbox" onchange="cbChanged()" id="2"><span>2</span></label></div>
-<div id="ck-button"><label><input type="checkbox" onchange="cbChanged()" id="3"><span>3</span></label></div>
-<div id="ck-button"><label><input type="checkbox" onchange="cbChanged()" id="4"><span>4</span></label></div>
-<div id="ck-button"><label><input type="checkbox" onchange="cbChanged()" id="5"><span>5</span></label></div>
-<div id="ck-button"><label><input type="checkbox" onchange="cbChanged()" id="6"><span>6</span></label></div>
-<div id="ck-button"><label><input type="checkbox" onchange="cbChanged()" id="7"><span>7</span></label></div>
-<div id="ck-button"><label><input type="checkbox" onchange="cbChanged()" id="8"><span>8</span></label></div>
-<div id="ck-button"><label><input type="checkbox" onchange="cbChanged()" id="9"><span>9</span></label></div>
-<div id="ck-button"><label><input type="checkbox" onchange="cbChanged()" id="12"><span>12</span></label></div>
+<div class="select-wrapper" >
+   <label>Select operation</label>   
+   <select id="operations" onchange="cbChanged()">
+      <option value="multiply">Mal (Multiply)</option>
+      <option value="divide">Geteilt (Divide)</option>
+   </select>
+</div>
+
+<div class="center">
+   <div id="ck-button"><label><input type="checkbox" onchange="cbChanged()" id="2"><span>2</span></label></div>
+   <div id="ck-button"><label><input type="checkbox" onchange="cbChanged()" id="3"><span>3</span></label></div>
+   <div id="ck-button"><label><input type="checkbox" onchange="cbChanged()" id="4"><span>4</span></label></div>
+   <div id="ck-button"><label><input type="checkbox" onchange="cbChanged()" id="5"><span>5</span></label></div>
+   <div id="ck-button"><label><input type="checkbox" onchange="cbChanged()" id="6"><span>6</span></label></div>
+   <div id="ck-button"><label><input type="checkbox" onchange="cbChanged()" id="7"><span>7</span></label></div>
+   <div id="ck-button"><label><input type="checkbox" onchange="cbChanged()" id="8"><span>8</span></label></div>
+   <div id="ck-button"><label><input type="checkbox" onchange="cbChanged()" id="9"><span>9</span></label></div>
+   <div id="ck-button"><label><input type="checkbox" onchange="cbChanged()" id="12"><span>12</span></label></div>
+</div>
 
 <br>
 <br>
@@ -118,7 +129,7 @@
 0,/*🙁*/	128577	,//1F641	 	
 1,/*🙂*/	128578	,//1F642	 	
 1,/*🙃*/	128579	,//1F643	 	
-1,/*🙄*/	128580	,//1F644	 	
+0,/*🙄*/	128580	,//1F644	 	
 1,/*🤐*/  129296	,//	1F910	 
 
 ];
@@ -130,7 +141,9 @@ var startTimeMillis;
 var startOfQuestionMillis;
 var slowestQuestion;
 var slowestQuestionMillis=0;
+var answersPerMinute = 0;
 var previousQuestions = new Array;
+var correctAnswer = 0;
 var nrOfHappyEmojis = 0;
 var nrOfSadEmojis = 0;
 for( i=0; i<emojis.length/2; ++i)
@@ -161,7 +174,7 @@ nrOfSadEmojis = emojis.length/2 - nrOfHappyEmojis;
 
    function choose(btn) 
    {
-      var r = a * b;
+      var sQuestion = previousQuestions[previousQuestions.length-1];
 
       if ( correctChoice == btn )
       {
@@ -171,12 +184,12 @@ nrOfSadEmojis = emojis.length/2 - nrOfHappyEmojis;
          if ( timeForQuestionMillis > slowestQuestionMillis )
          {
             slowestQuestionMillis = timeForQuestionMillis;
-            slowestQuestion = a.toString() + " * " + b.toString() + " = " + r.toString();
+            slowestQuestion = sQuestion;
          }
          
          var minutesSinceStart = (nowMillis - startTimeMillis)/1000/60;
-         var answersPerMinute = Math.round( nrOfSuccessiveCorrectAnswers / minutesSinceStart );
-         document.getElementById('Result').innerHTML = 'Richtig: ' + r.toString();
+         answersPerMinute = Math.round( nrOfSuccessiveCorrectAnswers / minutesSinceStart );
+         document.getElementById('Result').innerHTML = 'Richtig: ' + correctAnswer.toString();
          document.getElementById('Successive').innerHTML = "Hintereinander richtig: "+nrOfSuccessiveCorrectAnswers.toString();
          document.getElementById('Speed').innerHTML = "Je Minute: " + answersPerMinute.toString();
 
@@ -191,11 +204,11 @@ nrOfSadEmojis = emojis.length/2 - nrOfHappyEmojis;
       }
       else
       {
-         document.getElementById('Result').innerHTML = 'Leider falsch. Richtig wäre ' + r.toString();
+         document.getElementById('Result').innerHTML = 'Leider falsch. ' + sQuestion;
          document.getElementById('smiley').innerHTML = String.fromCodePoint(randomEmoji(false));
-         document.getElementById('Speed').innerHTML = "Langsam bei: " + slowestQuestion + " ("+(slowestQuestionMillis/1000).toFixed(1)+" Sekunden)";
+         document.getElementById('Speed').innerHTML = "Je Minute: " + answersPerMinute.toString() +", langsam bei: " + slowestQuestion + " ("+(slowestQuestionMillis/1000).toFixed(1)+" Sekunden)";
          //setTimeout( startGame, 5000);
-         cbChanged();
+         showStartButton();
       }
    }
 
@@ -224,12 +237,27 @@ nrOfSadEmojis = emojis.length/2 - nrOfHappyEmojis;
          b = randomInt(2,10);
       }
 
+      var comboBox = document.getElementById("operations");
+      var selectedOperationIdx = comboBox.selectedIndex;
+      var operations = comboBox.options;
+      var op = operations[selectedOperationIdx].value;
+
       var question;
       do
       {
          a = randomInt(1,10);
-         question = a.toString() + " * " + b.toString();
-      } while ( previousQuestions.indexOf(question)!=-1 ); // don't repeat if in list
+         if (op=="multiply")
+         {
+            question = a.toString() + " * " + b.toString();
+            correctAnswer = a * b;
+         }
+         else if (op=="divide")
+         {
+            question = (a*b).toString() + " : " + b.toString();
+            correctAnswer = a;
+         }
+         
+      } while ( previousQuestions.indexOf(question)!=-1 ); // don't repeat the question if it is in list
 
       previousQuestions.push(question);
       if (previousQuestions.length>5) // allow only 5 previous entries
@@ -254,9 +282,18 @@ nrOfSadEmojis = emojis.length/2 - nrOfHappyEmojis;
 
    function cbChanged()
    {
+      showStartButton();
+      document.getElementById('Result').innerHTML = '';
+      document.getElementById('smiley').innerHTML = '';
+      document.getElementById('Speed').innerHTML = '';
+      document.getElementById('Successive').innerHTML = '';
+   }
+
+   function showStartButton()
+   {
       document.getElementById('Start').style.display = "block";
       document.getElementById('AnswerButtons').style.display = "none";
-      document.getElementById('Question').innerHTML = '';
+      document.getElementById('Question').innerHTML = '';      
    }
 
    function prepareNextTask()
@@ -265,7 +302,6 @@ nrOfSadEmojis = emojis.length/2 - nrOfHappyEmojis;
       prepareQuestion();
       document.getElementById('smiley').innerHTML = '?';
 
-      var correctAnswer = a * b;
       var answers = new Array;
       var nrOfChoices = 4;
       for(i=0;i<nrOfChoices;++i)
