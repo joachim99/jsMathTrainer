@@ -31,6 +31,8 @@
    <select id="operations" onchange="cbChanged()">
       <option value="multiply">Mal (Multiply)</option>
       <option value="divide">Geteilt (Divide)</option>
+      <option value="add">Plus (Add)</option>
+      <option value="subtract">Minus (Subtract)</option>
    </select>
 </div>
 
@@ -204,7 +206,7 @@ nrOfSadEmojis = emojis.length/2 - nrOfHappyEmojis;
       }
       else
       {
-         document.getElementById('Result').innerHTML = 'Leider falsch. ' + sQuestion;
+         document.getElementById('Result').innerHTML = 'Leider falsch. ' + sQuestion + ' (Richtig: ' + correctAnswer + ')';
          document.getElementById('smiley').innerHTML = String.fromCodePoint(randomEmoji(false));
          document.getElementById('Speed').innerHTML = "Je Minute: " + answersPerMinute.toString() +", langsam bei: " + slowestQuestion + " ("+(slowestQuestionMillis/1000).toFixed(1)+" Sekunden)";
          //setTimeout( startGame, 5000);
@@ -256,7 +258,16 @@ nrOfSadEmojis = emojis.length/2 - nrOfHappyEmojis;
             question = (a*b).toString() + " : " + b.toString();
             correctAnswer = a;
          }
-         
+         else if (op=="add")
+         {
+            question = a.toString() + " + " + b.toString();
+            correctAnswer = a + b;
+         }
+         else if (op=="subtract")
+         {
+            question = (a+b).toString() + " - " + b.toString();
+            correctAnswer = a;
+         }         
       } while ( previousQuestions.indexOf(question)!=-1 ); // don't repeat the question if it is in list
 
       previousQuestions.push(question);
