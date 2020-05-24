@@ -29,10 +29,10 @@
 <div class="select-wrapper" >
    <label>Select operation</label>   
    <select id="operations" onchange="cbChanged()">
-      <option value="multiply">Mal (Multiply)</option>
-      <option value="divide">Geteilt (Divide)</option>
-      <option value="add">Plus (Add)</option>
-      <option value="subtract">Minus (Subtract)</option>
+      <option id="multiply" value="*" >Mal (Multiply)</option>
+      <option id="divide"   value=":" >Geteilt (Divide)</option>
+      <option id="add"      value="+" >Plus (Add)</option>
+      <option id="subtract" value="-" >Minus (Subtract)</option>
    </select>
 </div>
 
@@ -66,6 +66,10 @@
 <div class="center" style="font-size:30px" id="Result">&nbsp;</div>
 <p class="center" style="font-size:30px" id="Successive"/>
 <p class="center" style="font-size:30px" id="Speed"/>
+
+<table id="statistics" style="width:100%;text-align: center;max-width: 900px;visibility: hidden;" class="center">
+   <tr style="background-color:rgb(212, 212, 212)"><th>Op</th><th>Selected</th><th>Correct</th><th>Per Minute</th><th>Error</th><th>Slowest</th><th>Slowest Time</th></tr>
+</table>
 
 
 <script>
@@ -164,9 +168,9 @@ nrOfSadEmojis = emojis.length/2 - nrOfHappyEmojis;
       {
          if ( emojis[i*2]==(bHappy ? 1 : 0) )
          {
-            ++i2;
             if ( i2 == idx )
                return emojis[i*2+1];
+            ++i2;
          }
       }
       return emojis[1];
@@ -188,8 +192,10 @@ nrOfSadEmojis = emojis.length/2 - nrOfHappyEmojis;
             slowestQuestionMillis = timeForQuestionMillis;
             slowestQuestion = sQuestion;
          }
+         sumTimeMillis += timeForQuestionMillis;
          
-         var minutesSinceStart = (nowMillis - startTimeMillis)/1000/60;
+         var minutesSinceStart = sumTimeMillis/1000/60; // count only thinking time, not the emoji display pause
+         //var minutesSinceStart = (nowMillis - startTimeMillis)/1000/60;  // time including emoji display
          answersPerMinute = Math.round( nrOfSuccessiveCorrectAnswers / minutesSinceStart );
          document.getElementById('Result').innerHTML = 'Richtig: ' + correctAnswer.toString();
          document.getElementById('Successive').innerHTML = "Hintereinander richtig: "+nrOfSuccessiveCorrectAnswers.toString();
@@ -208,10 +214,29 @@ nrOfSadEmojis = emojis.length/2 - nrOfHappyEmojis;
       {
          document.getElementById('Result').innerHTML = 'Leider falsch. ' + sQuestion + ' (Richtig: ' + correctAnswer + ')';
          document.getElementById('smiley').innerHTML = String.fromCodePoint(randomEmoji(false));
-         document.getElementById('Speed').innerHTML = "Je Minute: " + answersPerMinute.toString() +", langsam bei: " + slowestQuestion + " ("+(slowestQuestionMillis/1000).toFixed(1)+" Sekunden)";
+         document.getElementById('Speed').innerHTML = "Je Minute: " + answersPerMinute.toString() +
+            ", langsam bei: " + slowestQuestion + " ("+(slowestQuestionMillis/1000).toFixed(1)+" Sekunden)";
          //setTimeout( startGame, 5000);
-         showStartButton();
+
+         addStatistics(sQuestion);
+
+         showStartButton();         
       }
+   }
+
+   function addStatistics(sQuestion)
+   {
+      var table = document.getElementById("statistics");
+      var row = table.insertRow();
+      table.style.visibility = "visible";
+      row.insertCell(0).innerHTML = selectedOperation[1]; // operator
+      row.insertCell(1).innerHTML = selectedValues.toString();
+      row.insertCell(2).innerHTML = nrOfSuccessiveCorrectAnswers.toString();
+      row.insertCell(3).innerHTML = answersPerMinute.toString();
+      row.insertCell(4).innerHTML = sQuestion;
+      row.insertCell(5).innerHTML = slowestQuestion;
+      row.insertCell(6).innerHTML = (slowestQuestionMillis/1000).toFixed(1);
+      nrOfSuccessiveCorrectAnswers = 0;
    }
 
    function randomInt(min,max)
@@ -219,7 +244,17 @@ nrOfSadEmojis = emojis.length/2 - nrOfHappyEmojis;
       return min + Math.floor( Math.random()*(max-min+1) );
    }
 
-   function prepareQuestion()
+   function getOperationFromComboBox()
+   {
+      var comboBox = document.getElementById("operations");
+      var selectedOperationIdx = comboBox.selectedIndex;
+      var operations = comboBox.options;
+      var op = operations[selectedOperationIdx].id;
+      var operator = operations[selectedOperationIdx].value;
+      return [op,operator];  
+   }
+
+   function getCheckedValues()
    {
       var checkedValues = new Array;
       for( var i=0; i<=12; ++i )
@@ -228,6 +263,12 @@ nrOfSadEmojis = emojis.length/2 - nrOfHappyEmojis;
          if ( element != null && element.checked )
             checkedValues.push(i);
       }
+      return checkedValues;
+   }
+
+   function prepareQuestion()
+   {
+      var checkedValues = selectedValues;
 
       if ( checkedValues.length>0 )
       {
@@ -239,10 +280,7 @@ nrOfSadEmojis = emojis.length/2 - nrOfHappyEmojis;
          b = randomInt(2,10);
       }
 
-      var comboBox = document.getElementById("operations");
-      var selectedOperationIdx = comboBox.selectedIndex;
-      var operations = comboBox.options;
-      var op = operations[selectedOperationIdx].value;
+      var [op,operator] = selectedOperation;
 
       var question;
       do
@@ -282,13 +320,16 @@ nrOfSadEmojis = emojis.length/2 - nrOfHappyEmojis;
    {
       nrOfSuccessiveCorrectAnswers = 0;
       startTimeMillis = Date.now();
-      startOfQuestionMillis = startTimeMillis;
+      sumTimeMillis = 0;
       slowestQuestionMillis = 0;
       slowestQuestion="";
       previousQuestions = new Array();
+      selectedValues = getCheckedValues();
+      selectedOperation = getOperationFromComboBox();
       prepareNextTask();      
       document.getElementById('Start').style.display = "none";
       document.getElementById('AnswerButtons').style.display = "block";
+      document.getElementById('statistics').style.visibility = "hidden";
    }
 
    function cbChanged()
@@ -298,6 +339,9 @@ nrOfSadEmojis = emojis.length/2 - nrOfHappyEmojis;
       document.getElementById('smiley').innerHTML = '';
       document.getElementById('Speed').innerHTML = '';
       document.getElementById('Successive').innerHTML = '';
+
+      if ( nrOfSuccessiveCorrectAnswers>0 )
+         addStatistics("-");
    }
 
    function showStartButton()
