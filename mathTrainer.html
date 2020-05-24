@@ -152,6 +152,7 @@ var previousQuestions = new Array;
 var correctAnswer = 0;
 var nrOfHappyEmojis = 0;
 var nrOfSadEmojis = 0;
+var bFirstTry = true;
 for( i=0; i<emojis.length/2; ++i)
 {
    if ( emojis[i*2]>0 ) 
@@ -173,7 +174,7 @@ nrOfSadEmojis = emojis.length/2 - nrOfHappyEmojis;
             ++i2;
          }
       }
-      return emojis[1];
+      return emojis[1]; // should never be reached
    }
 
    var correctChoice = 0;
@@ -184,15 +185,18 @@ nrOfSadEmojis = emojis.length/2 - nrOfHappyEmojis;
 
       if ( correctChoice == btn )
       {
-         ++nrOfSuccessiveCorrectAnswers;
-         var nowMillis = Date.now();
-         var timeForQuestionMillis = nowMillis - startOfQuestionMillis;
-         if ( timeForQuestionMillis > slowestQuestionMillis )
+         if ( bFirstTry )
          {
-            slowestQuestionMillis = timeForQuestionMillis;
-            slowestQuestion = sQuestion;
+            ++nrOfSuccessiveCorrectAnswers;
+            var nowMillis = Date.now();
+            var timeForQuestionMillis = nowMillis - startOfQuestionMillis;
+            if ( timeForQuestionMillis > slowestQuestionMillis )
+            {
+               slowestQuestionMillis = timeForQuestionMillis;
+               slowestQuestion = sQuestion;
+            }
+            sumTimeMillis += timeForQuestionMillis;
          }
-         sumTimeMillis += timeForQuestionMillis;
          
          var minutesSinceStart = sumTimeMillis/1000/60; // count only thinking time, not the emoji display pause
          //var minutesSinceStart = (nowMillis - startTimeMillis)/1000/60;  // time including emoji display
@@ -203,24 +207,30 @@ nrOfSadEmojis = emojis.length/2 - nrOfHappyEmojis;
 
          document.getElementById('smiley').innerHTML = String.fromCodePoint(randomEmoji(true));
 
-         document.getElementById('choose0').disabled = true;
-         document.getElementById('choose1').disabled = true;
-         document.getElementById('choose2').disabled = true;
-         document.getElementById('choose3').disabled = true;
+         for (var i=0;i<4; ++i)
+         {
+            var button = document.getElementById('choose'+i.toString());
+            button.style.color = "";
+            button.disabled = true;
+         }
 
          setTimeout( prepareNextTask, 1000);
       }
       else
       {
-         document.getElementById('Result').innerHTML = 'Leider falsch. ' + sQuestion + ' (Richtig: ' + correctAnswer + ')';
-         document.getElementById('smiley').innerHTML = String.fromCodePoint(randomEmoji(false));
-         document.getElementById('Speed').innerHTML = "Je Minute: " + answersPerMinute.toString() +
-            ", langsam bei: " + slowestQuestion + " ("+(slowestQuestionMillis/1000).toFixed(1)+" Sekunden)";
+         document.getElementById('Result').innerHTML = 'Leider falsch. Probiere es nochmal.';
+         if (bFirstTry)
+            document.getElementById('smiley').innerHTML = String.fromCodePoint(randomEmoji(false));
+
+         //document.getElementById('Speed').innerHTML = "Je Minute: " + answersPerMinute.toString() +
+         //   ", langsam bei: " + slowestQuestion + " ("+(slowestQuestionMillis/1000).toFixed(1)+" Sekunden)";
          //setTimeout( startGame, 5000);
 
          addStatistics(sQuestion);
+         bFirstTry = false;
 
-         showStartButton();         
+         document.getElementById('choose'+btn.toString()).style.color = "red";
+         //showStartButton();         
       }
    }
 
@@ -228,7 +238,6 @@ nrOfSadEmojis = emojis.length/2 - nrOfHappyEmojis;
    {
       var table = document.getElementById("statistics");
       var row = table.insertRow();
-      table.style.visibility = "visible";
       row.insertCell(0).innerHTML = selectedOperation[1]; // operator
       row.insertCell(1).innerHTML = selectedValues.toString();
       row.insertCell(2).innerHTML = nrOfSuccessiveCorrectAnswers.toString();
@@ -342,6 +351,8 @@ nrOfSadEmojis = emojis.length/2 - nrOfHappyEmojis;
 
       if ( nrOfSuccessiveCorrectAnswers>0 )
          addStatistics("-");
+      if ( document.getElementById('statistics').rows.length > 1 ) // more than the header row?
+         document.getElementById('statistics').style.visibility = "visible";
    }
 
    function showStartButton()
@@ -384,6 +395,7 @@ nrOfSadEmojis = emojis.length/2 - nrOfHappyEmojis;
       document.getElementById('choose1').disabled = false;
       document.getElementById('choose2').disabled = false;
       document.getElementById('choose3').disabled = false;
+      bFirstTry = true;
    }
 
    cbChanged();
